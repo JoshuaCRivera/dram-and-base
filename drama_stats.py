@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import os
+import db_handling
 
 drama_stats = {}
 
@@ -30,3 +31,4 @@ for drama_file in os.listdir('data'):
 
 
 print(drama_stats)
+db_handling.create_drama_db(drama_stats)
