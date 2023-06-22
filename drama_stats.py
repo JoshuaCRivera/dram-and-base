@@ -26,9 +26,10 @@ for drama_file in os.listdir('data'):
 
     num_stage_dirs = len(root.findall('.//{http://www.tei-c.org/ns/1.0}stage'))
 
-    drama_stats[id_no] = {"title": title, "author": author, "year": year, "num_scenes": num_scenes, "num_lines": num_lines,
+    drama_stats[id_no] = {"id": id_no, "title": title, "author": author, "year": year, "num_scenes": num_scenes, "num_lines": num_lines,
                           "num_stage_dirs": num_stage_dirs,  }
 
 
 print(drama_stats)
 db_handling.create_drama_db(drama_stats)
+print(db_handling.similarity(drama1="Q214310", drama2="Q68117"))
