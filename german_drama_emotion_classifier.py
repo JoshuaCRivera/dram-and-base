@@ -9,6 +9,20 @@ import pickle
 data = pd.read_csv('large_emotions_filtered_withNoAnnotations.csv')
 data = data[(data['tag_type'] != 'no_annotation') & (data['tag_type'] != 'Emotionale Bewegtheit')]
 
+# Reduces the diffrent catagories to just 6 emotions that are better distributed
+data['tag_type'] = data['tag_type'].replace({'Abscheu': 'Ärger',
+                                             'Ärger': 'Ärger',
+                                             'Angst': 'Angst',
+                                             'Verzweiflung': 'Angst',
+                                             'Freude': 'Freude',
+                                             'Lust': 'Freude',
+                                             'Freundschaft': 'Zuneigung',
+                                             'Verehrung': 'Zuneigung',
+                                             'Leid': 'Trauer',
+                                             'Mitleid': 'Trauer',
+                                             'Liebe': 'Liebe',
+                                             'Schadenfreude': 'Liebe'})
+
 X = data['text']
 y_emotion = data['tag_type']
 y_polarity = data['polarity']
