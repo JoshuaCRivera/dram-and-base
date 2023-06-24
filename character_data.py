@@ -6,9 +6,15 @@ def character_stats(filename):
 
     namespace = {'tei': 'http://www.tei-c.org/ns/1.0'}
 
+    title = root.find('.//tei:titleStmt/tei:title[@type="main"]', namespace).text.strip()
+
+    id_no = root.find('.//{http://www.tei-c.org/ns/1.0}idno').text
+
     characters = []
     for name in root.findall(".//tei:persName", namespace):
-        characters.append(name.text)
+        character = name.text.strip()  # Strip leading and trailing whitespace
+        if character:  # Skip empty characters
+            characters.append(character)
 
     profile_desc = root.find(".//tei:profileDesc", namespace)
     relations = profile_desc.findall(".//tei:relation", namespace)
@@ -26,7 +32,7 @@ def character_stats(filename):
     longest_speaker = ''
     longest_line = ''
 
-    shortest_length = 100
+    shortest_length = 1000
     shortest_speaker = ''
     shortest_line = ''
 
@@ -53,36 +59,29 @@ def character_stats(filename):
         else:
             speaker_counts[speaker] = 1
 
-    print("Named Characters:")
-    for c in sorted(characters):
-        print(c)
-    print()
+    character_stats = {
+        "id_no": id_no,
+        "title": title,
+        "characters": sorted(characters),
+        "speaker_counts": {speaker: count for speaker, count in sorted(speaker_counts.items(), key=lambda x: x[1], reverse=True)},
+        "relationships": relationships,
+        "longest_dialogue": {
+            "speaker": longest_speaker,
+            "length": longest_length,
+            #"line": longest_line
+        },
+        "shortest_dialogue": {
+            "speaker": shortest_speaker,
+            "length": shortest_length,
+            #"line": shortest_line
+        }
+    }
 
-    print("Speaker Counts:")
-    for speaker, count in sorted(speaker_counts.items(), key=lambda x: x[1], reverse=True):
-        print(f"{speaker}: {count}")
-    print()
-
-    print("Relationships:")
-    for relationship, mutual, active, passive in relationships:
-        print("Relationship:", relationship)
-        print("Mutual:", mutual)
-        print("Active:", active)
-        print("Passive:", passive)
-        print()
-
-    print("Speaker of longest dialogue:", longest_speaker)
-    print("Length of longest dialogue:", longest_length)
-    # print("Longest dialogue:", longest_line)
-    print()
-
-    print("Speaker of shortest dialogue:", shortest_speaker)
-    print("Length of shortest dialogue:", shortest_length)
-    # print("Shortest dialogue:", shortest_line)
+    return character_stats
 
 # Example:
 filename = "tei/sachs-ein-comedi-von-dem-reichen-sterbenden-menschen-der-hecastus-genannt.xml"
-character_stats(filename)
+print(character_stats(filename))
 
 
 
