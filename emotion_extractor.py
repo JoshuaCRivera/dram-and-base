@@ -1,15 +1,9 @@
 import os
-import csv
 import xml.etree.ElementTree as ET
 import sentiment_prediction as sp
 
-directory = 'tei/'
-csv_file = 'dialogue_data.csv'
-
-with open(csv_file, 'w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-
-    writer.writerow(['Filename', 'Speaker', 'Text', 'Line Number', 'Emotion', 'Polarity'])
+def emotion_extractor(directory):
+    emotion_data = {}
 
     for filename in os.listdir(directory):
         if filename.endswith('.xml'):
@@ -19,7 +13,7 @@ with open(csv_file, 'w', newline='', encoding='utf-8') as file:
             root = tree.getroot()
 
             namespace = {'tei': 'http://www.tei-c.org/ns/1.0'}
-
+            title = root.find('.//tei:titleStmt/tei:title[@type="main"]', namespace).text.strip()
             dialogue_lines = root.findall('.//tei:sp', namespace)
 
             previous_speaker = None
@@ -41,14 +35,23 @@ with open(csv_file, 'w', newline='', encoding='utf-8') as file:
 
                     emotion = sp.predict_emotion(text)
                     polarity = sp.predict_polarity(text)
-                    print(filename)
-                    print(text)
-                    print(emotion)
-                    print(polarity)
-                    print(line_number)
 
-                    writer.writerow([filename, speaker, text, line_number, emotion, polarity])
+                    if title not in emotion_data:
+                        emotion_data[title] = []
+                    print(title)
+                    emotion_data[title].append({
+                        'Speaker': speaker,
+                        #'Text': text,
+                        'Line Number': line_number,
+                        'Emotion': emotion,
+                        'Polarity': polarity
+                    })
 
                     line_number += 1
 
                 previous_speaker = speaker
+
+    return emotion_data
+ 
+directory = 'tei/'
+print(emotion_extractor(directory))
