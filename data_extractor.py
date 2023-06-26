@@ -59,7 +59,7 @@ def emotion_extractor(directory):
 
 def save_to_csv(data, filename):
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['Title', 'id_no', 'Speaker', 'Line Number', 'Emotion', 'Polarity'] 'Title' in fieldnames
+        fieldnames = ['Title', 'id_no', 'Speaker', 'Line Number', 'Emotion', 'Polarity']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
