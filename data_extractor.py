@@ -39,6 +39,8 @@ def emotion_extractor(directory):
 
                     emotion = sp.predict_emotion(text)
                     polarity = sp.predict_polarity(text)
+                    
+                    emotion_num, polarity_num = sp.classify_text_emotion_polarity(text)
 
                     if title not in emotion_data:
                         emotion_data[title] = []
@@ -48,7 +50,9 @@ def emotion_extractor(directory):
                         'Speaker': speaker,
                         'Line Number': line_number,
                         'Emotion': emotion,
+                        'Emotion Scores': emotion_num,
                         'Polarity': polarity,
+                        'Polarity Scores': polarity_num,
                         'Text': text,
                     })
 
@@ -60,8 +64,8 @@ def emotion_extractor(directory):
 
 def save_to_csv(data, filename):
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['Title', 'id_no', 'Speaker', 'Line Number', 'Emotion', 'Polarity', 'Text',]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        fieldnames = ['Title', 'id_no', 'Speaker', 'Line Number', 'Emotion','Emotion Scores', 'Polarity', 'Polarity Scores', 'Text',]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
 
         for title, lines in data.items():
