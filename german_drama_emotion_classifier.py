@@ -10,18 +10,18 @@ data = pd.read_csv('large_emotions_filtered_withNoAnnotations.csv')
 data = data[(data['tag_type'] != 'no_annotation') & (data['tag_type'] != 'Emotionale Bewegtheit')]
 
 # Reduces the diffrent catagories to just 6 emotions that are better distributed
-data['tag_type'] = data['tag_type'].replace({'Abscheu': 'Ärger',
+data['tag_type'] = data['tag_type'].replace({'Abscheu': 'Abscheu',
                                              'Ärger': 'Ärger',
                                              'Angst': 'Angst',
                                              'Verzweiflung': 'Angst',
                                              'Freude': 'Freude',
                                              'Lust': 'Freude',
-                                             'Freundschaft': 'Zuneigung',
-                                             'Verehrung': 'Zuneigung',
-                                             'Leid': 'Trauer',
-                                             'Mitleid': 'Trauer',
+                                             'Freundschaft': 'Freude',
+                                             'Verehrung': 'Verehrung',
+                                             'Leid': 'Leid',
+                                             'Mitleid': 'Leid',
                                              'Liebe': 'Liebe',
-                                             'Schadenfreude': 'Liebe'})
+                                             'Schadenfreude': 'Freude'})
 
 X = data['text']
 y_emotion = data['tag_type']
