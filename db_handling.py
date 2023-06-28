@@ -1,21 +1,30 @@
 import sqlite3
 import math
 import numpy as np
+'''
+This file implements methods to create query the drama database and to calculate similaritites.
+'''
 
 columns = []
 column_types = {}
+numeric_cols = []
 
+'''
+Creates a SQLite database and in it a table dramas
+Input: a dictionary representing a list of dramas, each value in the dict is a dictionary representing entries as column: value.
+Also appends a line each to the table for minima and maxima in the numeric columns.
+'''
 def create_drama_db(dramas_dict: dict):
     connection = sqlite3.connect('drama_base.db')
     cursor = connection.cursor()
 
     # getting column names and types, translating those to sql (ugly)
-    global columns
-    global column_types
+    global columns, numeric_cols, column_types
     columns = list((list(dramas_dict.values())[0].keys()))
     type_dict = {"<class 'int'>": "integer", "<class 'str'>": "text", "<class 'float'>": "real"}
     column_types = {col: type_dict[str(type(list(dramas_dict.values())[0][col]))] for col in columns}
     print(column_types)
+    numeric_cols = [i for i in range(len(columns)) if column_types[columns[i]] != 'text']
 
     #creating table
     columns_str = ", ".join(f"{col} {column_types[col]}" for col in columns[1:])
@@ -43,7 +52,6 @@ def create_drama_db(dramas_dict: dict):
         connection.commit()
 
     # calculating averages
-
     mins = []
     maxs = []
     for col in columns:
@@ -62,7 +70,10 @@ def create_drama_db(dramas_dict: dict):
     connection.commit()
     connection.close()
 
-
+'''
+Creates table characters in the db 
+Input: A dictionary where each value is a dict that represents the column:vallue entries for one character
+'''
 def create_characters_db(char_dict):
     connection = sqlite3.connect('drama_base.db')
     cursor = connection.cursor()
@@ -92,37 +103,77 @@ def create_characters_db(char_dict):
     connection.close()
         
 '''
-Calculates the similarity between two dramas. Currently takes IDs --> drama names?
+Queries the database using SQL syntax.
+Output: tuple of number_of_results, results
 '''
-def similarity(drama1: str, drama2: str):
+def query(query: str):
     connection = sqlite3.connect('drama_base.db')
     cursor = connection.cursor()
-    query = "SELECT * from dramas WHERE id = '{}' OR id = '{}'".format(drama1, drama2)
+    rows = cursor.execute(query).fetchall()
+    return len(rows), rows
+
+'''
+Calculates the similarity between two dramas as normalized vectors.
+The similarity is 1 - normalized euclidean distance
+'''
+def similarity(drama_vec1: list, drama_vec2: list):
+    dist = math.dist(drama_vec1, drama_vec2)
+    # normalize so that 0 < sim < 1
+    sim = 1 - (dist / math.sqrt(len(numeric_cols)))
+    return sim
+
+'''
+Takes drama ID or name and returns normalized drama vector for similarity
+'''
+def drama_vector(drama: str):
+    connection = sqlite3.connect('drama_base.db')
+    cursor = connection.cursor()
+    query = f"SELECT * from dramas WHERE id = '{drama}' OR title = '{drama}'"
     cursor.execute(query)
     # returns tuples
     rows = cursor.fetchall()
-    assert len(rows) == 2
-    numeric_cols = [i for i in range(len(columns)) if column_types[columns[i]] != 'text']
-    v1 = [rows[0][i] for i in numeric_cols]
-    v2 = [rows[1][i] for i in numeric_cols]
-    print(v1, v2)
+    assert len(rows) == 1
+
+    # these are column indices
+    #numeric_cols = [i for i in range(len(columns)) if column_types[columns[i]] != 'text']
+    v = [rows[0][i] for i in numeric_cols]
 
     all_mins = cursor.execute("SELECT * from dramas WHERE id = 'min'").fetchall()[0] #is this tuple or [tuple]?
     all_maxs = cursor.execute("SELECT * from dramas WHERE id = 'max'").fetchall()[0] #is this tuple or [tuple]?
     mins = [all_mins[i] for i in numeric_cols]
     maxs = [all_maxs[i] for i in numeric_cols]
 
-    assert len(mins) == len(maxs) and len(maxs) == len(v1) and len(v1) == len(v2)
+    assert len(mins) == len(maxs) and len(maxs) == len(v)
 
     # rescale values based on maxima and minima
-    v1 = normalize(v1, mins, maxs)
-    v2 = normalize(v2, mins, maxs)
-    print(v1, v2)
-    dist = math.dist(v1, v2)
-    # normalize so that 0 < sim < 1
-    sim = 1 - (dist / math.sqrt(len(numeric_cols)))
-    return sim
+    v = normalize(v, mins, maxs)
+    return v
 
+'''
+takes in a condition in SQL syntax and returns the average of all dramas fulfilling that condition 
+as a normalized numeric vector 
+'''
+def average_of_all(condition:str):
+    connection = sqlite3.connect('drama_base.db')
+    cursor = connection.cursor()
+    query = "SELECT * from dramas WHERE " + condition
+    rows = cursor.execute(query).fetchall()
+    n = len(rows)
+    #numeric_cols = [i for i in range(len(columns)) if column_types[columns[i]] != 'text']
+    all_mins = cursor.execute("SELECT * from dramas WHERE id = 'min'").fetchall()[0] #is this tuple or [tuple]?
+    all_maxs = cursor.execute("SELECT * from dramas WHERE id = 'max'").fetchall()[0] #is this tuple or [tuple]?
+    mins = [all_mins[i] for i in numeric_cols]
+    maxs = [all_maxs[i] for i in numeric_cols]
+    
+    avg_vector = []
+    for i in numeric_cols:
+        avg_vector.append(sum([row[i] for row in rows]) / n)
+    avg_vector = normalize(avg_vector, mins=mins, maxs=maxs) #TODO maybe first norm, then avg?
+    return avg_vector
+
+'''
+auxiliary function: normalizes a vector to the range (0, 1) based on the maximum and minimum values 
+'''
 def normalize(v: list, mins: list, maxs: list):
     v_norm = []
     for i in range(len(v)):
