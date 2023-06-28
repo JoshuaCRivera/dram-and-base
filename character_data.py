@@ -39,9 +39,13 @@ def character_stats(filename):
     speaker_counts = {}
 
     for sp in root.findall('.//tei:sp', namespace):
-        speaker = sp.find('tei:speaker', namespace).text
-        dialogue = ' '.join([line.text.strip() for line in sp.findall('tei:l', namespace)])
-
+        try:
+            speaker = sp.find('tei:speaker', namespace).text
+            dialogue = ' '.join([line.text.strip() for line in sp.findall('tei:l', namespace)])
+        except:
+            continue
+            print("cont")
+        
         length = len(dialogue)
 
         if length > longest_length:
@@ -60,28 +64,28 @@ def character_stats(filename):
             speaker_counts[speaker] = 1
 
     character_stats = {
-        "id_no": id_no,
+        "id": id_no,
         "title": title,
-        "characters": sorted(characters),
-        "speaker_counts": {speaker: count for speaker, count in sorted(speaker_counts.items(), key=lambda x: x[1], reverse=True)},
-        "relationships": relationships,
-        "longest_dialogue": {
-            "speaker": longest_speaker,
-            "length": longest_length,
+        "num_characters": len(sorted(characters)),
+        #"speaker_counts": {speaker: count for speaker, count in sorted(speaker_counts.items(), key=lambda x: x[1], reverse=True)},
+        #"relationships": relationships,
+        #"longest_dialogue": {
+        #   "speaker": longest_speaker,
+            "longest_dialogue": longest_length,
             #"line": longest_line
-        },
-        "shortest_dialogue": {
-            "speaker": shortest_speaker,
-            "length": shortest_length,
+        #},
+        #"shortest_dialogue": {
+        #    "speaker": shortest_speaker,
+            "shortest_dialogue": shortest_length,
             #"line": shortest_line
-        }
+        #}
     }
 
     return character_stats
 
 # Example:
 filename = "tei/sachs-ein-comedi-von-dem-reichen-sterbenden-menschen-der-hecastus-genannt.xml"
-print(character_stats(filename))
+#print(character_stats(filename))
 
 
 

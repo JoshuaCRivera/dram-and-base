@@ -20,6 +20,7 @@ def create_drama_db(dramas_dict: dict):
 
     # getting column names and types, translating those to sql (ugly)
     global columns, numeric_cols, column_types
+    print(list(dramas_dict.values())[:3])
     columns = list((list(dramas_dict.values())[0].keys()))
     type_dict = {"<class 'int'>": "integer", "<class 'str'>": "text", "<class 'float'>": "real"}
     column_types = {col: type_dict[str(type(list(dramas_dict.values())[0][col]))] for col in columns}
@@ -48,6 +49,8 @@ def create_drama_db(dramas_dict: dict):
         try: 
             cursor.execute(insert_query_d)
         except:
+            print(insert_query_d)
+            break
             print("drama already in db")
         connection.commit()
 
