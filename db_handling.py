@@ -86,22 +86,28 @@ def create_characters_db(char_dict):
     print(column_types)
 
     # create table
-    columns_str = " ".join(f"{col} {column_types[col]}" for col in columns)
-    create_query_c = "CREATE TABLE characters(id text PRIMARY KEY " + columns_str + ")"
+    columns_str = ", ".join(f"{col} {column_types[col]}" for col in columns[1:])
+    create_query_c = "CREATE TABLE characters(id text PRIMARY KEY, " + columns_str + ")"
+    #print(create_query_c)
     cursor.execute(create_query_c)
 
     # adding character data to table
-    for id, character in char_dict.items():
-        # this is a bad way to ensure text comes in ''
-        insert_query_c = f"INSERT INTO characters VALUES('{id}'" #TODO change if id integer: remove ''
+    for character in char_dict.values():
+    
+        entries = []
         for col in columns:
             if column_types[col] == 'text':
-                insert_query_c += f", '{character[col]}'"
+                entries.append(f"'{character[col]}'")
             else:
-                insert_query_c += f", {character[col]}"
-        insert_query_d += ")"
-        print(insert_query_c)
-        cursor.execute(insert_query_c)
+                entries.append( f"{character[col]}")
+
+        insert_query_c = f"INSERT INTO characters VALUES(" + ", ".join(entries) + ")"
+        #print(insert_query_c)
+        try:
+            cursor.execute(insert_query_c)
+        except:
+            print(insert_query_c)
+            raise Exception()
         connection.commit()
     connection.close()
         
