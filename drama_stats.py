@@ -21,7 +21,7 @@ def get_all_drama_stats():
         title_stmt = root.find('.//{http://www.tei-c.org/ns/1.0}fileDesc/{http://www.tei-c.org/ns/1.0}titleStmt')
         #print(title_stmt.findall('./*'))
         title = title_stmt.find('./{http://www.tei-c.org/ns/1.0}title[@type="main"]').text.replace("'","")
-        print(id_no)
+        #print(id_no)
         try:
             subtitle = title_stmt.find('./{http://www.tei-c.org/ns/1.0}title[@type="sub"]').text.replace("'","")
         except: 
@@ -42,10 +42,11 @@ def get_all_drama_stats():
         elif root.find('.//{http://www.tei-c.org/ns/1.0}standOff//{http://www.tei-c.org/ns/1.0}event[@type="premiere"]'):
             year = root.find('.//{http://www.tei-c.org/ns/1.0}standOff//{http://www.tei-c.org/ns/1.0}event[@type="premiere"]').get('when')
         else:
-            year = "unknown"
+            year = '1914'
 
-        num_scenes = len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="scene"]'))
-        num_lines = len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="scene"]//{http://www.tei-c.org/ns/1.0}p'))
+        num_scenes = max(len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="scene"]')), len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="act"]')), 1)
+        num_lines = len(root.findall('.//{http://www.tei-c.org/ns/1.0}sp//{http://www.tei-c.org/ns/1.0}p')) + len(root.findall('.//{http://www.tei-c.org/ns/1.0}sp//{http://www.tei-c.org/ns/1.0}l'))
+        #num_lines = len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="scene"]//{http://www.tei-c.org/ns/1.0}p'))
 
         num_stage_dirs = len(root.findall('.//{http://www.tei-c.org/ns/1.0}stage'))
 

@@ -41,7 +41,7 @@ def character_stats(filename):
     for sp in root.findall('.//tei:sp', namespace):
         try:
             speaker = sp.find('tei:speaker', namespace).text
-            dialogue = ' '.join([line.text.strip() for line in sp.findall('tei:l', namespace)])
+            dialogue = ' '.join([line.text.strip() for line in sp.findall('.//tei:l', namespace) + sp.findall('.//tei:p', namespace)])
         except:
             continue
             print("cont")
@@ -53,7 +53,7 @@ def character_stats(filename):
             longest_speaker = speaker
             longest_line = dialogue
 
-        if length < shortest_length:
+        if 0 < length < shortest_length:
             shortest_length = length
             shortest_speaker = speaker
             shortest_line = dialogue
