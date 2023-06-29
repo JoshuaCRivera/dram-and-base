@@ -11,6 +11,7 @@ with open('polarity_model.pkl', 'rb') as f:
 with open('vectorizer.pkl', 'rb') as f:
     vectorizer = pickle.load(f)
 
+# Run models
 def predict_emotion(sentence):
     sentence_vectorized = vectorizer.transform([sentence])
     emotion_prediction = model_emotion.predict(sentence_vectorized)
@@ -24,7 +25,8 @@ def predict_polarity(sentence):
 def softmax(x):
     e_x = np.exp(x - np.max(x))
     return e_x / e_x.sum()
-    
+
+#
 def classify_text_emotion_polarity(text):
     # Vectorize the text
     text_vectorized = vectorizer.transform([text])
@@ -44,11 +46,4 @@ def classify_text_emotion_polarity(text):
     polarity_probabilities = {polarity: prob for polarity, prob in zip(polarities, polarity_probs)}
 
     return emotion_probabilities, polarity_probabilities
-
-
-# Example usage
-#sentence = "Das Stück ist wirklich großartig"
-#print(sentence)
-#print("Predicted emotion:", predict_emotion(sentence))
-#print("Predicted polarity:", predict_polarity(sentence))
 
