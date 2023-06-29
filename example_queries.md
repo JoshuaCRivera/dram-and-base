@@ -1,5 +1,24 @@
 # Example queries
 
+## Plays without male characters
+
+```sql
+SELECT d.title, d.id 
+FROM dramas AS d 
+WHERE d.id NOT IN (
+    SELECT c.drama_id 
+    FROM characters AS c 
+    WHERE c.gender = 'MALE') 
+    AND d.id NOT LIKE 'min' AND d.id NOT LIKE 'max'
+```
+
+```
+(3, [('Proserpina', 'goethe-proserpina'), 
+('Die von der Weisheit wider die Unwissenheit beschützte Schauspielkunst', 'neuber-die-beschuetzte-schauspielkunst'), 
+('Die Verehrung der Vollkommenheit durch die gebesserten deutschen Schauspiele', 'neuber-die-verehrung-der-vollkommenheit')])
+```
+
+
 ## Average number of lines per gender
 
 ```sql
@@ -33,6 +52,29 @@ MALE	388
 UNKNOWN	84
 ```
 
+## Looking at emotions
+Get the play with the highest love score
+```sql
+SELECT d1.title, d1.genre
+FROM dramas as d1, dramas as d2
+WHERE d1.Liebe = d2.Liebe and d2.id = 'max' and d1.id <> 'max'
+```
+
+```
+(1, [('Die zärtlichen Schwestern', 'comedy')])
+```
+
+Get the saddest play
+```sql
+SELECT d1.title, d1.genre
+FROM dramas as d1, dramas as d2
+WHERE d1.Leid = d2.Leid and d2.id = 'max' and d1.id <> 'max'
+```
+
+```
+(1, [('Cili Cohrs', 'unknown')])
+```
+--> not annotated as comedy or tragedy, but we would suspect it from the score (and indeed it is described as "Irnsthaftig Spill" in the subtitle)
 
 ## Comedies with less than 10 scenes
 
@@ -53,3 +95,37 @@ Komtesse Mizzi oder Der Familientag
 Literatur
 Die Dorfschule
 ```
+
+## Similarity sanity check
+We expect that plays by the same author have high similarity, higher than that to other plays of the same time.
+We also expect plays from the same epoch to have higher similarity than plays from different epochs.
+(We use the ID here, since there ar etwo plays called "Medea")
+
+We can see that the similarity measures behave as expected.
+
+```python
+similarity('grillparzer-medea', 'Sappho')
+similarity("grillparzer-medea', 'year = '1821'")
+similarity('grillparzer-medea', "year = '1921'")
+```
+
+```
+0.870
+0.842
+0.793
+```
+
+
+## What is a melodrama?
+The drama "Ino" is described as a "melodrama". We want to know whether it has more similarity with a comedy or a tragedy. We see that the similarity is higher to tragedies than to comedies.
+
+```python
+similarity('Ino', "genre = 'comedy'")
+similarity('Ino', "genre = 'tragedy'")
+```
+
+```
+0.621
+0.694
+```
+

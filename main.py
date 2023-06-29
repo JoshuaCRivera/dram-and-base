@@ -21,7 +21,5 @@ if not "drama_base.db" in os.listdir():
 
 
 # add db queries and similarity queries here
-print(similarity('Ino', "genre = 'comedy'"))
-print(similarity('Ino', "genre = 'tragedy'"))
-print(similarity('lessing-der-freigeist', "year < '1750'"))
-print(similarity('lessing-der-freigeist', "year > '1900'"))
+print(query("SELECT d.title, d.id FROM dramas AS d WHERE d.id NOT IN (SELECT c.drama_id FROM characters AS c WHERE c.gender = 'MALE') AND d.id NOT LIKE 'min' AND d.id NOT LIKE 'max'"))
+

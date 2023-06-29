@@ -143,7 +143,8 @@ def similarity(drama1: str, drama2: str):
 
     dist = math.dist(drama_vec1, drama_vec2)
     # normalize so that 0 < sim < 1
-    sim = 1 - (dist / math.sqrt(len(numeric_cols)))
+    sim = (1 - (dist / math.sqrt(len(numeric_cols))))**2
+    sim = round(sim, 3)
     return sim
 
 '''
