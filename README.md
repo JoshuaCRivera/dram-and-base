@@ -1,6 +1,6 @@
 # dram-and-base
 
-This is our README documentation, our query file is [queries.md](queries.md).
+This is our README documentation, our query file is [example_queries.md](example_queries.md).
 
 ## Our story
 We are interested in dramas spanning different times, genres and languages. We are looking at structural and statistical information rather than deep linguistic or literary annotations.
@@ -36,7 +36,7 @@ We are interested in questions like:
 * You can calculate the similarity between two dramas.
 * You can calculate the similarity between a drama and a group of dramas, or two groups of dramas. These groups can be flexibly defined by an SQL condition.
 * You can take a look at the nice graphs and visualizations we generated using our extension.
-* See different examples of queries in our [queries.md](queries.md) file.
+* See different examples of queries in our [example_queries.md](example_queries.md). file.
 * See some fun stats in [fun_stats.md](fun_stats.md)
 
-- Relevant files: db_handling.py
+- Relevant files: db_handling.py, main.py
