@@ -18,6 +18,7 @@ def get_all_drama_stats():
 
         id_no = drama_file[:-4] #root.find('.//{http://www.tei-c.org/ns/1.0}idno').text
         
+        # basic drama information
         title_stmt = root.find('.//tei:fileDesc/tei:titleStmt', namespace)
         #print(title_stmt.findall('./*'))
         title = title_stmt.find('./{http://www.tei-c.org/ns/1.0}title[@type="main"]').text.replace("'","")
@@ -44,6 +45,7 @@ def get_all_drama_stats():
         else:
             year = '1914'
 
+        # calculating statistics
         num_scenes = max(len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="scene"]')), len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="act"]')), 1)
         num_lines = len(root.findall('.//{http://www.tei-c.org/ns/1.0}sp//{http://www.tei-c.org/ns/1.0}p')) + len(root.findall('.//{http://www.tei-c.org/ns/1.0}sp//{http://www.tei-c.org/ns/1.0}l'))
         #num_lines = len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="scene"]//{http://www.tei-c.org/ns/1.0}p'))

@@ -188,3 +188,8 @@ def normalize(v: list, mins: list, maxs: list):
     for i in range(len(v)):
         v_norm.append((v[i] - mins[i])/ (maxs[i] - mins[i]))
     return v_norm
+
+def average_value(column, table="dramas", condition="1=1"):
+    connection = sqlite3.connect('drama_base.db')
+    cursor = connection.cursor()
+    query = "SELECT * from dramas WHERE " + condition
