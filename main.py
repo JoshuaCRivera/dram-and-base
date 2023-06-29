@@ -18,4 +18,10 @@ if not "drama_base.db" in os.listdir():
     # creates table dramas in SQLite database
     create_characters_db(characters)
 
+
+
 # add db queries and similarity queries here
+print(similarity('Ino', "genre = 'comedy'"))
+print(similarity('Ino', "genre = 'tragedy'"))
+print(similarity('lessing-der-freigeist', "year < '1750'"))
+print(similarity('lessing-der-freigeist', "year > '1900'"))

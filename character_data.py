@@ -29,7 +29,7 @@ def get_all_character_stats():
             
             character_stats[char_id] = {"id": char_id, "name": name, "drama": title, "drama_id": id_no, "gender": gender,
                                         "num_lines": 0, "num_scenes": 0,
-                                        "len_longest_line": 0, "len_shortest_line": 1000,
+                                        "len_longest_line": 0, "len_shortest_line": 10000,
                                         "relations": ""}
 
         # number of scenes 
@@ -90,6 +90,10 @@ def get_all_character_stats():
                     character_stats[speaker]["len_shortest_line"] = length
 
                 character_stats[speaker]['num_lines'] += 1
+
+        for charmander in all_characters:
+            if character_stats[id_no + '-' + charmander]["len_shortest_line"] == 10000:
+                character_stats[id_no + '-' + charmander]["len_shortest_line"] == 0
         #print(character_stats)
     return character_stats
 

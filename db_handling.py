@@ -5,9 +5,12 @@ import numpy as np
 This file implements methods to create query the drama database and to calculate similaritites.
 '''
 
-columns = []
-column_types = {}
-numeric_cols = []
+columns = ['id', 'title', 'subtitle', 'author', 'year', 'genre', 'num_scenes', 'num_lines', 'num_stage_dirs', 'num_characters', 'longest_dialogue', 'shortest_dialogue', 'Freude', 'Leid', 'Ärger', 'Verehrung', 'Liebe', 'Angst', 'Abscheu']
+column_types = {'id': 'text', 'title': 'text', 'subtitle': 'text', 'author': 'text', 'year': 'text', 'genre': 'text', 
+                'num_scenes': 'integer', 'num_lines': 'integer', 'num_stage_dirs': 'integer', 'num_characters': 'integer', 
+                'longest_dialogue': 'integer', 'shortest_dialogue': 'integer', 
+                'Freude': 'real', 'Leid': 'real', 'Ärger': 'real', 'Verehrung': 'real', 'Liebe': 'real', 'Angst': 'real', 'Abscheu': 'real'}
+numeric_cols = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
 
 '''
 Creates a SQLite database and in it a table dramas
@@ -20,12 +23,14 @@ def create_drama_db(dramas_dict: dict):
 
     # getting column names and types, translating those to sql (ugly)
     global columns, numeric_cols, column_types
-    print(list(dramas_dict.values())[:3])
+    #print(list(dramas_dict.values())[:3])
     columns = list((list(dramas_dict.values())[0].keys()))
+    print(columns)
     type_dict = {"<class 'int'>": "integer", "<class 'str'>": "text", "<class 'float'>": "real"}
     column_types = {col: type_dict[str(type(list(dramas_dict.values())[0][col]))] for col in columns}
     print(column_types)
     numeric_cols = [i for i in range(len(columns)) if column_types[columns[i]] != 'text']
+    print(numeric_cols)
 
     #creating table
     columns_str = ", ".join(f"{col} {column_types[col]}" for col in columns[1:])
@@ -110,7 +115,8 @@ def create_characters_db(char_dict):
             raise Exception()
         connection.commit()
     connection.close()
-        
+
+
 '''
 Queries the database using SQL syntax.
 Output: tuple of number_of_results, results
@@ -125,7 +131,16 @@ def query(query: str):
 Calculates the similarity between two dramas as normalized vectors.
 The similarity is 1 - normalized euclidean distance
 '''
-def similarity(drama_vec1: list, drama_vec2: list):
+def similarity(drama1: str, drama2: str):
+    try:
+        drama_vec1 = drama_vector(drama1)
+    except:
+        drama_vec1 = average_of_all(drama1)
+    try:
+        drama_vec2 = drama_vector(drama2)
+    except:
+        drama_vec2 = average_of_all(drama2)
+
     dist = math.dist(drama_vec1, drama_vec2)
     # normalize so that 0 < sim < 1
     sim = 1 - (dist / math.sqrt(len(numeric_cols)))
@@ -189,7 +204,8 @@ def normalize(v: list, mins: list, maxs: list):
         v_norm.append((v[i] - mins[i])/ (maxs[i] - mins[i]))
     return v_norm
 
-def average_value(column, table="dramas", condition="1=1"):
-    connection = sqlite3.connect('drama_base.db')
-    cursor = connection.cursor()
-    query = "SELECT * from dramas WHERE " + condition
+#SQL can do that itself
+# def average_value(column, table="dramas", condition="1=1"):
+#     connection = sqlite3.connect('drama_base.db')
+#     cursor = connection.cursor()
+#     query = "SELECT * from dramas WHERE " + condition

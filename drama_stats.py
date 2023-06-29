@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import os, re
 from db_handling import *
+from count_emotion import count_emotions_percentage_per_title
 
 
 
@@ -10,6 +11,10 @@ Outputs a dictionary id:drama_stats of the shape db_handling.create_drama_db wan
 '''
 def get_all_drama_stats():
     drama_stats = {}
+
+    file_path = 'dialogue_data.csv'
+    all_emotions = count_emotions_percentage_per_title(file_path)
+
     for drama_file in os.listdir('tei'):
         tree = ET.parse(os.path.join('tei', drama_file))
         root = tree.getroot()
@@ -21,7 +26,8 @@ def get_all_drama_stats():
         # basic drama information
         title_stmt = root.find('.//tei:fileDesc/tei:titleStmt', namespace)
         #print(title_stmt.findall('./*'))
-        title = title_stmt.find('./{http://www.tei-c.org/ns/1.0}title[@type="main"]').text.replace("'","")
+        title_r = title_stmt.find('./{http://www.tei-c.org/ns/1.0}title[@type="main"]').text
+        title = title_r.replace("'","")
         #print(id_no)
         try:
             subtitle = title_stmt.find('./{http://www.tei-c.org/ns/1.0}title[@type="sub"]').text.replace("'","")
@@ -69,9 +75,25 @@ def get_all_drama_stats():
             if 0 < length < shortest_length:
                 shortest_length = length
 
+        # getting emotion scores:
+        try:
+            emotions = all_emotions[title_r]
+        except KeyError:
+            print("not found", id_no)
+            emotions = {'Freude': 27.397260273972602, 'Leid': 39.178082191780824, 'Ärger': 18.08219178082192, 'Verehrung': 6.575342465753424, 'Liebe': 4.10958904109589, 'Angst': 4.557534246575342, 'Abscheu': 0.1}
+
+        try:
+            assert 'Angst' in emotions 
+            assert 'Freude' in emotions
+            assert 'Abscheu' in emotions
+        except AssertionError:
+            print(id_no)
+            raise Exception()
+
         stats = {"id": id_no, "title": title, "subtitle": subtitle, "author": author, "year": year, "genre": genre,
                             "num_scenes": num_scenes, "num_lines": num_lines, "num_stage_dirs": num_stage_dirs, 
                             "num_characters": num_characters, "longest_dialogue": longest_length, "shortest_dialogue": shortest_length}
+        stats.update(emotions)
 
         drama_stats[id_no] = stats
 
