@@ -4,7 +4,7 @@ def count_emotions_percentage_per_title(file_path):
     emotions_per_title = {}
 
     # Open the CSV file
-    with open(file_path, 'r', newline='') as file:
+    with open(file_path, 'r', newline='', encoding="utf-8") as file:
         reader = csv.reader(file, delimiter='\t')
 
         # Skip the header row
@@ -17,11 +17,12 @@ def count_emotions_percentage_per_title(file_path):
 
             # Initialize a dictionary for each title if it doesn't exist
             if title not in emotions_per_title:
-                emotions_per_title[title] = {}
+                emotions_per_title[title] = {'Freude': 0, 'Leid': 0, 'Ärger': 0, 'Verehrung': 0, 'Liebe': 0, 'Angst': 0, 'Abscheu': 0}
+
 
             # Initialize the emotion count for each title if it doesn't exist
-            if emotion not in emotions_per_title[title]:
-                emotions_per_title[title][emotion] = 0
+            # if emotion not in emotions_per_title[title]:
+            #     emotions_per_title[title][emotion] = 0
 
             # Increment the count for the emotion for the specific title
             emotions_per_title[title][emotion] += 1
@@ -39,5 +40,5 @@ def count_emotions_percentage_per_title(file_path):
 # Define the file path of the CSV file
 file_path = 'dialogue_data.csv'
 
-print(count_emotions_percentage_per_title(file_path))
+#print(count_emotions_percentage_per_title(file_path))
 

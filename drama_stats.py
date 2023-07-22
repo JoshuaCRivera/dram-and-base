@@ -9,58 +9,65 @@ from count_emotion import count_emotions_percentage_per_title
 Iterates through all dramas, collects some basic info and calculates some statistics about each.
 Outputs a dictionary id:drama_stats of the shape db_handling.create_drama_db wants it
 '''
-def get_all_drama_stats():
+def get_all_drama_stats(corpus="tei"):
     drama_stats = {}
 
     file_path = 'dialogue_data.csv'
     all_emotions = count_emotions_percentage_per_title(file_path)
 
-    for drama_file in os.listdir('tei'):
-        tree = ET.parse(os.path.join('tei', drama_file))
+    for drama_file in os.listdir(corpus):
+        tree = ET.parse(os.path.join(corpus, drama_file))
         root = tree.getroot()
         namespace = {'tei': 'http://www.tei-c.org/ns/1.0'}
 
 
-        id_no = drama_file[:-4] #root.find('.//{http://www.tei-c.org/ns/1.0}idno').text
+        id_no = drama_file[:-4] #root.find('.//tei:idno').text
         
         # basic drama information
         title_stmt = root.find('.//tei:fileDesc/tei:titleStmt', namespace)
         #print(title_stmt.findall('./*'))
-        title_r = title_stmt.find('./{http://www.tei-c.org/ns/1.0}title[@type="main"]').text
+        title_r = title_stmt.find('./tei:title[@type="main"]', namespace).text
         title = title_r.replace("'","")
         #print(id_no)
         try:
-            subtitle = title_stmt.find('./{http://www.tei-c.org/ns/1.0}title[@type="sub"]').text.replace("'","")
+            subtitle = title_stmt.find('./tei:title[@type="sub"]', namespace).text.replace("'","")
         except: 
             subtitle = ""
 
+        #prev: 302 unknown
+        if root.find('.//tei:textClass//tei:term[@type="genreTitle"]', namespace).text:
+            genre = root.find('.//tei:textClass//tei:term[@type="genreTitle"]', namespace).text.lower()
         if re.search("omödi|ustsp|osse|omisch|chert?z", subtitle):
             genre = "comedy"
         elif re.search("ragödi|rauer",subtitle):
             genre = "tragedy"
         else:
             genre = "unknown"
-        author = title_stmt.findall('.//{http://www.tei-c.org/ns/1.0}author/{http://www.tei-c.org/ns/1.0}persName/*')
+        author = title_stmt.findall('.//tei:author/tei:persName/*', namespace)
         author = " ".join([author_part.text for author_part in author]).replace("'","")
 
         # currently getting publication, not premiere
-        if root.find('.//{http://www.tei-c.org/ns/1.0}standOff//{http://www.tei-c.org/ns/1.0}event[@type="print"]'):
-            year = root.find('.//{http://www.tei-c.org/ns/1.0}standOff//{http://www.tei-c.org/ns/1.0}event[@type="print"]').get('when')
-        elif root.find('.//{http://www.tei-c.org/ns/1.0}standOff//{http://www.tei-c.org/ns/1.0}event[@type="premiere"]'):
-            year = root.find('.//{http://www.tei-c.org/ns/1.0}standOff//{http://www.tei-c.org/ns/1.0}event[@type="premiere"]').get('when')
+        if root.find('.//tei:standOff//tei:event[@type="print"]', namespace):
+            year = root.find('.//tei:standOff//tei:event[@type="print"]', namespace).get('when')
+        elif root.find('.//tei:standOff//tei:event[@type="premiere"]', namespace):
+            year = root.find('.//tei:standOff//tei:event[@type="premiere"]', namespace).get('when')
         else:
             year = '1914'
 
         # calculating statistics
-        num_scenes = max(len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="scene"]')), len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="act"]')), 1)
-        num_lines = len(root.findall('.//{http://www.tei-c.org/ns/1.0}sp//{http://www.tei-c.org/ns/1.0}p')) + len(root.findall('.//{http://www.tei-c.org/ns/1.0}sp//{http://www.tei-c.org/ns/1.0}l'))
-        #num_lines = len(root.findall('.//{http://www.tei-c.org/ns/1.0}div[@type="scene"]//{http://www.tei-c.org/ns/1.0}p'))
-
+        num_scenes = max(len(root.findall('.//tei:div[@type="scene"]', namespace)), len(root.findall('.//tei:div[@type="act"]', namespace)), 1)
+        num_lines = len(root.findall('.//tei:sp//tei:p', namespace)) + len(root.findall('.//tei:sp//tei:l', namespace))
+        
         num_stage_dirs = len(root.findall('.//tei:stage', namespace))
 
         num_characters = len(root.findall(".//tei:persName", namespace))
 
-        #character_data = character_stats(os.path.join('tei', drama_file))
+        if root.find('.//tei:set', namespace):
+            setting = root.find('.//tei:set//tei:p', namespace).text.replace("'", "")
+        elif root.find('.//tei:div[@type="set"]', namespace):
+            setting = root.find('.//tei:div[@type="set"]/tei:p', namespace).text.replace("'", "")
+        else:
+            setting = "unknown"
 
         longest_length = 0
         shortest_length = 1000
@@ -90,14 +97,14 @@ def get_all_drama_stats():
             print(id_no)
             raise Exception()
 
-        stats = {"id": id_no, "title": title, "subtitle": subtitle, "author": author, "year": year, "genre": genre,
+        stats = {"id": id_no, "title": title, "subtitle": subtitle, "author": author, "year": year, "genre": genre, "setting": setting,
                             "num_scenes": num_scenes, "num_lines": num_lines, "num_stage_dirs": num_stage_dirs, 
                             "num_characters": num_characters, "longest_dialogue": longest_length, "shortest_dialogue": shortest_length}
         stats.update(emotions)
 
         drama_stats[id_no] = stats
 
-    print(len(drama_stats.keys()))
+    #print(len(drama_stats.keys()))
     return drama_stats
 
 #drama_stats = get_all_drama_stats()
