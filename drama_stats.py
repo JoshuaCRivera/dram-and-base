@@ -9,11 +9,12 @@ from count_emotion import count_emotions_percentage_per_title
 Iterates through all dramas, collects some basic info and calculates some statistics about each.
 Outputs a dictionary id:drama_stats of the shape db_handling.create_drama_db wants it
 '''
-def get_all_drama_stats(corpus="tei"):
+def get_all_drama_stats(corpus="tei", emotions=True):
     drama_stats = {}
 
-    file_path = 'dialogue_data.csv'
-    all_emotions = count_emotions_percentage_per_title(file_path)
+    if emotions:
+        file_path = 'dialogue_data.csv'
+        all_emotions = count_emotions_percentage_per_title(file_path)
 
     for drama_file in os.listdir(corpus):
         tree = ET.parse(os.path.join(corpus, drama_file))
@@ -21,23 +22,22 @@ def get_all_drama_stats(corpus="tei"):
         namespace = {'tei': 'http://www.tei-c.org/ns/1.0'}
 
 
-        id_no = drama_file[:-4] #root.find('.//tei:idno').text
+        id_no = drama_file[:-4]
         
         # basic drama information
         title_stmt = root.find('.//tei:fileDesc/tei:titleStmt', namespace)
-        #print(title_stmt.findall('./*'))
-        title_r = title_stmt.find('./tei:title[@type="main"]', namespace).text
-        title = title_r.replace("'","")
+        title_r = " ".join(title_stmt.find('./tei:title', namespace).itertext()) #main should always be first, [@type="main"] removed for compatibility with swe, also added itertext
+        title = title_r.strip().replace("'","")
         #print(id_no)
         try:
             subtitle = title_stmt.find('./tei:title[@type="sub"]', namespace).text.replace("'","")
         except: 
             subtitle = ""
 
-        #prev: 302 unknown
-        if root.find('.//tei:textClass//tei:term[@type="genreTitle"]', namespace).text:
+        # Add genre: Use annotated genreTitle, else try to infer from subtitle
+        if len(root.findall('.//tei:textClass//tei:term[@type="genreTitle"]', namespace)) > 0 and root.find('.//tei:textClass//tei:term[@type="genreTitle"]', namespace).text:
             genre = root.find('.//tei:textClass//tei:term[@type="genreTitle"]', namespace).text.lower()
-        if re.search("omödi|ustsp|osse|omisch|chert?z", subtitle):
+        elif re.search("omödi|ustsp|osse|omisch|chert?z", subtitle) or re.search("omedi", subtitle): # crude inclusion for swe
             genre = "comedy"
         elif re.search("ragödi|rauer",subtitle):
             genre = "tragedy"
@@ -46,7 +46,7 @@ def get_all_drama_stats(corpus="tei"):
         author = title_stmt.findall('.//tei:author/tei:persName/*', namespace)
         author = " ".join([author_part.text for author_part in author]).replace("'","")
 
-        # currently getting publication, not premiere
+        # currently getting publication as primary date, not premiere
         if root.find('.//tei:standOff//tei:event[@type="print"]', namespace):
             year = root.find('.//tei:standOff//tei:event[@type="print"]', namespace).get('when')
         elif root.find('.//tei:standOff//tei:event[@type="premiere"]', namespace):
@@ -63,7 +63,7 @@ def get_all_drama_stats(corpus="tei"):
         num_characters = len(root.findall(".//tei:persName", namespace))
 
         if root.find('.//tei:set', namespace):
-            setting = root.find('.//tei:set//tei:p', namespace).text.replace("'", "")
+            setting = " ".join(root.find('.//tei:set[1]', namespace).itertext()).strip().replace("'", "") #CHANGED for swe from //tei:p
         elif root.find('.//tei:div[@type="set"]', namespace):
             setting = root.find('.//tei:div[@type="set"]/tei:p', namespace).text.replace("'", "")
         else:
@@ -83,24 +83,26 @@ def get_all_drama_stats(corpus="tei"):
                 shortest_length = length
 
         # getting emotion scores:
-        try:
-            emotions = all_emotions[title_r]
-        except KeyError:
-            print("not found", id_no)
-            emotions = {'Freude': 27.397260273972602, 'Leid': 39.178082191780824, 'Ärger': 18.08219178082192, 'Verehrung': 6.575342465753424, 'Liebe': 4.10958904109589, 'Angst': 4.557534246575342, 'Abscheu': 0.1}
+        if emotions:
+            try:
+                emotions = all_emotions[title_r]
+            except KeyError:
+                print("not found", id_no)
+                emotions = {'Freude': 27.397260273972602, 'Leid': 39.178082191780824, 'Ärger': 18.08219178082192, 'Verehrung': 6.575342465753424, 'Liebe': 4.10958904109589, 'Angst': 4.557534246575342, 'Abscheu': 0.1}
 
-        try:
-            assert 'Angst' in emotions 
-            assert 'Freude' in emotions
-            assert 'Abscheu' in emotions
-        except AssertionError:
-            print(id_no)
-            raise Exception()
+            try:
+                assert 'Angst' in emotions 
+                assert 'Freude' in emotions
+                assert 'Abscheu' in emotions
+            except AssertionError:
+                print(id_no)
+                raise Exception()
 
         stats = {"id": id_no, "title": title, "subtitle": subtitle, "author": author, "year": year, "genre": genre, "setting": setting,
                             "num_scenes": num_scenes, "num_lines": num_lines, "num_stage_dirs": num_stage_dirs, 
                             "num_characters": num_characters, "longest_dialogue": longest_length, "shortest_dialogue": shortest_length}
-        stats.update(emotions)
+        if emotions:
+            stats.update(emotions)
 
         drama_stats[id_no] = stats
 

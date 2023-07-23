@@ -13,17 +13,22 @@ def get_all_character_stats(corpus='tei'):
         root = tree.getroot()
         namespace = {'tei': 'http://www.tei-c.org/ns/1.0', 'xml': 'http://www.w3.org/XML/1998/namespace'}
 
-        title = root.find('.//tei:titleStmt/tei:title[@type="main"]', namespace).text.strip().replace("'","")
+        title = " ".join(root.find('.//tei:titleStmt/tei:title', namespace).itertext()).strip().replace("'","") #main should always be first, [@type="main"] removed for compatibility with swe
         id_no = drama_file[:-4] # remove .xml
 
         # initialize basic stats for all characters
         all_characters = []
-        for person in root.findall(".//tei:person", namespace) + root.findall(".//tei:personGrp", namespace):
+        for person in root.findall(".//tei:particDesc//tei:person", namespace) + root.findall(".//tei:particDesc//tei:personGrp", namespace): #CHANGED added particDesc
             char_id = id_no + "-" + person.get('{http://www.w3.org/XML/1998/namespace}id')
             all_characters.append(person.get('{http://www.w3.org/XML/1998/namespace}id'))
 
             name_options = person.findall('.//tei:persName', namespace) + person.findall('.//tei:name', namespace)
-            name = name_options[0].text.strip().replace("'","") # Strip leading and trailing whitespace 
+            
+            if len(name_options) > 0: #CHANGED adapted for swe
+                name = name_options[0].text.strip().replace("'","")
+            else: #characters without names, appearantly 
+                #print(char_id)
+                name = person.get('{http://www.w3.org/XML/1998/namespace}id')
             gender = person.get('sex', 'unknown')
 
             if not name:  # check for empty characters
