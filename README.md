@@ -1,6 +1,6 @@
 # dram-and-base
 
-This is our README documentation, our query file is [example_queries.md](example_queries.md).
+Our one-page documentation is [documentation.pdf](documentation.pdf), our query file is [example_queries.md](example_queries.md).
 
 ## Our story
 We are interested in dramas spanning different times, genres and languages. We are looking at structural and statistical information rather than deep linguistic or literary annotations.
@@ -27,7 +27,9 @@ We are interested in questions like:
 * We put the information into an SQLite database with two tables: one for the dramas and one for the characters
 * The columns in the dramas table store information like the number of characters, number of scenes, length of the play in lines, longest dialogue turn... as well as scores for our seven emotions
 * The columns in the dramas table store information like their name, which drama they are from, their gender, the number of lines they speak and scenes they appear in, ...
+* We also created a db for the [Swedish Dracor](https://github.com/dracor-org/swedracor) to demonstrate that our system works for different languages (no emotion scores included in this one)
 - Relevant files: db_handling.py, drama_base.db
+
 
 ## Accessing the data
 * Queries go in main.py
@@ -39,4 +41,4 @@ We are interested in questions like:
 * See different examples of queries in our [example_queries.md](example_queries.md). file.
 * See some fun stats in [fun_stats.md](fun_stats.md)
 
-- Relevant files: db_handling.py, main.py
+- Relevant files: querying.py, main.py
