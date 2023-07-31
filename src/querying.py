@@ -1,5 +1,6 @@
 import sqlite3, math
 from db_handling import *
+import plots
 '''
 File for all querying operations the user has access to. Functions as a sort of API.
 '''
@@ -50,6 +51,10 @@ def top_k_most_similar(drama: str, k=5):
     all_listed.sort(key=lambda x:x[0], reverse=True)
     return all_listed [1:k+1]   # top drama will always be drama itself, so we cut it off
 
-def most_similar_graph(drama: str):
-    # put nx graph code here
-    pass
+
+'''
+Draws a directed graph of the first n dramas pointing to the k most similar other dramas.
+'''
+def most_similar_graph(n=100, k=3):
+    plots.draw_similarity_graph(n, k)
+    return

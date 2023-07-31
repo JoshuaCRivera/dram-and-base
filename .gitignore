@@ -8,3 +8,4 @@ doc/documentation.fls
 doc/documentation.log
 doc/documentation.synctex.gz
 doc/documentation.tex
+.env/
