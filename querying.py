@@ -18,7 +18,7 @@ def query(query: str):
 
 '''
 Calculates the similarity between two dramas as normalized vectors.
-The similarity is 1 - normalized euclidean distance
+The similarity is based on euclidean distance.
 '''
 def similarity(drama1: str, drama2: str):
     try:
@@ -38,7 +38,7 @@ def similarity(drama1: str, drama2: str):
 
 '''
 Takes in drama by title (if unique) and calculates similarities to all other dramas.
-Takes top k (choosable, default 5) and outputs their titles + IDs and similrity scores as list of tuples
+Takes top k (choosable, default 5) and outputs their titles + IDs and similarity scores as list of tuples
 '''
 def top_k_most_similar(drama: str, k=5):
     all_dramas_query = "SELECT title, id FROM dramas"
