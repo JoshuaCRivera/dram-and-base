@@ -1,6 +1,15 @@
 # dram-and-base
 
-Our one-page documentation is [documentation.pdf](documentation.pdf), our query file is [example_queries.md](example_queries.md).
+Our one-page documentation is [documentation.pdf](doc/documentation.pdf), our query file is [example_queries.md](example_queries.md).
+
+# Update:
+Since the previous version, the following things have been added:
+* characters: more fields (precentage of lines, main characters, ...)
+* top-k most similar
+* New language: Swedish
+* More visualizations
+* Cleaned up repo
+* documentation
 
 ## Our story
 We are interested in dramas spanning different times, genres and languages. We are looking at structural and statistical information rather than deep linguistic or literary annotations.
