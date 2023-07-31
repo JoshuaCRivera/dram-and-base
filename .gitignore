@@ -1,0 +1,10 @@
+*.pkl
+*.csv
+tei/
+__pycache__/
+doc/documentation.aux
+doc/documentation.fdb_latexmk
+doc/documentation.fls
+doc/documentation.log
+doc/documentation.synctex.gz
+doc/documentation.tex
