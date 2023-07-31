@@ -20,8 +20,8 @@ if not "drama_base.db" in os.listdir():
     # creates table characters in SQLite database
     create_characters_db(characters)
 
-
-
+print(len(query(f"SELECT COUNT(*) FROM characters WHERE name LIKE '%Faust%' AND characters.main_char = 'Yes' GROUP BY drama_id")))
+print(query(f"SELECT characters.drama FROM characters WHERE characters.name LIKE '%König%'"))
 # add db queries and similarity queries here
 #print(top_k_most_similar("gerhaeuser-der-moloch"))
 #print(query("SELECT d.title, d.id FROM dramas AS d WHERE d.id NOT IN (SELECT c.drama_id FROM characters AS c WHERE c.gender = 'MALE') AND d.id NOT LIKE 'min' AND d.id NOT LIKE 'max'"))

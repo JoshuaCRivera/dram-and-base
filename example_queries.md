@@ -18,6 +18,17 @@ WHERE d.id NOT IN (
 ('Die Verehrung der Vollkommenheit durch die gebesserten deutschen Schauspiele', 'neuber-die-verehrung-der-vollkommenheit')])
 ```
 
+## Plays about Faust
+How many dramas are there where the character with the most lines is called some variant of "Faust"?
+```sql
+SELECT COUNT(*)
+FROM dramas AS d
+JOIN characters AS c ON d.id = c.drama_id
+WHERE c.name LIKE '%Faust%' AND c.num_lines = (SELECT max(ch.num_lines) FROM characters AS ch WHERE c.drama_id = ch.drama_id)
+```
+```
+16 (Note that there are 25 dramas with a "Faust" character overall)
+```
 
 ## Average number of lines per gender
 
@@ -50,6 +61,24 @@ gender	count(characters.gender)
 FEMALE	160
 MALE	388
 UNKNOWN	84
+```
+
+## Dead parents
+Main characters whose parents die onstage
+```sql
+SELECT c.name AS child, p.name AS parent
+FROM characters AS c 
+JOIN characters AS p ON c.drama_id = p.drama_id
+WHERE c.main_char = 'Yes' AND p.dead = 'Yes' AND p.relations LIKE '%parent_of to ' || replace(c.id, rtrim(c.id, replace(c.id, '-', '')), '') || ')%'
+```
+```
+child       parent
+Franz	    Ferner
+Angelo	    Maria
+Faust	    Faustens Vater
+Faust	    Diether
+Prinzessin Alma	König Nicolo
+Karl	    Kaiser Ludwig
 ```
 
 ## Looking at emotions

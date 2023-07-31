@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import os, re
 from db_handling import *
-from count_emotion import count_emotions_percentage_per_title
+from emotions.count_emotion import count_emotions_percentage_per_title
 
 
 
